@@ -43,13 +43,23 @@ The server closes the connection after sending the complete response. Neither si
 
 ## URIs and selectors
 
-Gopher-NG locations use the `gofer` scheme:
+Gopher-NG locations use the `gofer` scheme. URI scheme comparison follows normal URI scheme comparison semantics.
 
 ```text
-gofer://authority:port/path
+gofer://host:port/path
 ```
 
-The authority and explicit port identify the server, and the path corresponds to the selector sent to that server. Core does not define a default port; a `gofer://` URI MUST contain an explicit port. For example, resolving:
+The host and explicit port identify the server. The host MUST be present. The port MUST be explicitly present and MUST be a decimal TCP port in the range 1 through 65535. Core does not define a default port. IPv6 literals use the normal bracketed URI form:
+
+```text
+gofer://[2001:db8::1]:7070/pet/123
+```
+
+The URI path represents the selector sent to the server. A `gofer://` URI MUST contain an explicit path beginning with `/`; an absent path is not implicitly converted to `/`. The path `/` represents the root selector.
+
+URI percent-encoded octets in the path are decoded before the selector is sent. The percent-decoded bytes MUST form valid UTF-8, and the resulting selector MUST satisfy the Core selector rules below. Percent-decoded CR, LF, TAB, and other prohibited control characters remain invalid because the resulting selector fails validation. Unicode normalization is unspecified.
+
+For example, resolving:
 
 ```text
 gofer://example.org:7070/pet/123
@@ -59,6 +69,26 @@ conceptually sends the following request after TLS is established:
 
 ```text
 /pet/123\r\n
+```
+
+Likewise:
+
+```text
+gofer://example.org:7070/pet/Moko%20Chan
+```
+
+maps to the selector:
+
+```text
+/pet/Moko Chan
+```
+
+Gopher-NG v0.0.1 Core URIs MUST NOT contain userinfo, a query, or a fragment. The following URIs are invalid:
+
+```text
+gofer://user@example.org:7070/
+gofer://example.org:7070/pet/123?x=1
+gofer://example.org:7070/pet/123#section
 ```
 
 A selector is UTF-8 text that MUST begin with `/` and MUST NOT contain CR, LF, TAB, or other C0 control characters. The root selector is `/`. A selector is sent exactly as:
@@ -227,7 +257,6 @@ Keeping discovery separate from execution avoids prematurely defining semantics 
 ## TBD
 
 - Whether a default TCP port will be assigned in a future version remains TBD; v0.0.1 requires every `gofer://` URI to contain an explicit port.
-- URI percent-encoding rules and the precise mapping between an encoded URI path and the UTF-8 selector remain TBD.
 - Unicode normalization requirements for selectors and record fields remain TBD.
 - A maximum selector length and response-size limits remain TBD; clients SHOULD nevertheless enforce local limits.
 - Minimum TLS version, cipher-suite policy, and certificate-validation profile remain TBD.
