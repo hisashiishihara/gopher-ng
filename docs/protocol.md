@@ -209,7 +209,7 @@ Terms such as `pet:Pet`, `pet:name`, `construction:Room`, and `nightlife:Custome
 
 The following record types are intentionally not defined in v0.0.1: `SERVICE`, `ACTION`, `CREDENTIAL`, `CAPABILITY`, and `EVENT`.
 
-`SERVICE` was considered for Core and deliberately deferred. A service URI can already be represented as ontology-defined data in a `FACT`, while a traversable Gopher-NG relation is represented by `LINK`. Giving service advertisement a dedicated Core type would therefore add cross-protocol semantics without adding necessary discovery power.
+`SERVICE` was considered for Core and deliberately deferred. A service URI can already be represented as ontology-defined data in a `FACT`, while a traversable Gopher-NG relation is represented by `LINK`. Giving service advertisement a dedicated Core type would therefore add cross-protocol semantics without adding necessary discovery power. The full rationale is recorded in [Design Decision 0001: `SERVICE` is not a Core record](decisions/0001-no-service-in-core.md).
 
 Keeping discovery separate from execution avoids prematurely defining semantics unnecessary for the first implementation.
 
