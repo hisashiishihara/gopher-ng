@@ -4,6 +4,8 @@
 
 This document specifies the Gopher-NG v0.0.1 Core Protocol. Gopher-NG is a minimal federated semantic discovery and traversal protocol for autonomous agents, inspired by RFC 1436.
 
+The protocol is guided by the non-normative design philosophy described in [Gopherism](gopherism.md). That document explains why the Core intentionally keeps discovery, traversal, execution, ontology semantics, and application behavior separate.
+
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when, and only when, they appear in all capitals.
 
 Its transaction model is deliberately small:
