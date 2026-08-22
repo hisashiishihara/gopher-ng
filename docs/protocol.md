@@ -20,7 +20,7 @@ connection close
 
 Transactions are stateless. Servers are independently operated and federation occurs through traversable links. Core defines discovery and traversal only; it does not define execution.
 
-Core does not define HTTP compatibility or HTTP-like methods, headers, sessions, cookies, content negotiation, chunked encoding, or keep-alive. It also does not define authentication, ontology schemas, databases, query or search syntax, mutation operations, subscriptions, MCP integration, tool invocation, or UDP discovery.
+Core does not define HTTP compatibility or HTTP-like methods, headers, sessions, cookies, content negotiation, chunked encoding, or keep-alive. It also does not define authentication, ontology schemas, databases, query or search syntax, mutation operations, subscriptions, cross-protocol service advertisement, MCP integration, tool invocation, or UDP discovery.
 
 ## Transport
 
@@ -128,9 +128,10 @@ Examples:
 ```text
 FACT	pet:name	Moko
 FACT	pet:species	pet:Dog
+FACT	pet:medical-record	https://vet.example/records/123
 ```
 
-Predicates and values are opaque to Gopher-NG Core.
+Predicates and values are opaque to Gopher-NG Core. A value MAY therefore identify a resource belonging to another protocol, but Core assigns no execution or traversal semantics to such a value.
 
 ### LINK
 
@@ -147,22 +148,6 @@ LINK	pet:veterinarian	gofer://vet.example:7070/pet/123
 ```
 
 The `gofer-uri` field MUST be an absolute `gofer://` URI with an explicit port. `LINK` is the primary federation and traversal mechanism.
-
-### SERVICE
-
-`SERVICE` advertises a service related to the entity without invoking it.
-
-```text
-SERVICE<TAB>relation<TAB>uri
-```
-
-Example:
-
-```text
-SERVICE	pet:medical-record	https://vet.example/records/123
-```
-
-A `SERVICE` record is descriptive only. Receiving one MUST NOT cause automatic service invocation.
 
 ## Errors
 
@@ -216,13 +201,15 @@ Terms such as `pet:Pet`, `pet:name`, `construction:Room`, and `nightlife:Custome
 - Discovered data is untrusted input.
 - `FACT` data MUST NOT automatically be treated as agent instructions.
 - `LINK` targets are untrusted.
-- `SERVICE` advertisement does not imply permission to invoke a service.
+- A URI appearing in a `FACT` value does not imply permission to dereference or invoke it.
 - Clients SHOULD impose limits on traversal depth and response size.
 - Credentials or authorization state belonging to other protocols MUST NOT automatically propagate to a different origin during traversal.
 
 ## Future work / deferred types
 
-The following record types are intentionally not defined in v0.0.1: `ACTION`, `CREDENTIAL`, `CAPABILITY`, and `EVENT`.
+The following record types are intentionally not defined in v0.0.1: `SERVICE`, `ACTION`, `CREDENTIAL`, `CAPABILITY`, and `EVENT`.
+
+`SERVICE` was considered for Core and deliberately deferred. A service URI can already be represented as ontology-defined data in a `FACT`, while a traversable Gopher-NG relation is represented by `LINK`. Giving service advertisement a dedicated Core type would therefore add cross-protocol semantics without adding necessary discovery power.
 
 Keeping discovery separate from execution avoids prematurely defining semantics unnecessary for the first implementation.
 

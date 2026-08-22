@@ -44,7 +44,7 @@ The goal is to preserve what made Gopher interesting in the first place: a clien
 
 Gopher-NG uses the `gofer://` URI scheme and intentionally defines discovery only.
 
-The Core protocol does not define HTTP-style methods or headers, sessions, cookies, authentication, ontology schemas, databases, mutation, subscriptions, MCP execution, tool invocation, or UDP discovery.
+The Core protocol does not define HTTP-style methods or headers, sessions, cookies, authentication, ontology schemas, databases, mutation, subscriptions, cross-protocol service advertisement, MCP execution, tool invocation, or UDP discovery.
 
 Its transaction model is deliberately small:
 

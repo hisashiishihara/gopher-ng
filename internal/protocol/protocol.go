@@ -27,11 +27,10 @@ var (
 type RecordType string
 
 const (
-	TypeEntity  RecordType = "ENTITY"
-	TypeFact    RecordType = "FACT"
-	TypeLink    RecordType = "LINK"
-	TypeService RecordType = "SERVICE"
-	TypeError   RecordType = "ERROR"
+	TypeEntity RecordType = "ENTITY"
+	TypeFact   RecordType = "FACT"
+	TypeLink   RecordType = "LINK"
+	TypeError  RecordType = "ERROR"
 )
 
 // Record is a Gopher-NG Core record. Fields excludes the record type.
@@ -172,7 +171,7 @@ func WriteResponse(w io.Writer, records []Record) error {
 
 func requiredFieldCount(recordType RecordType) (int, bool) {
 	switch recordType {
-	case TypeEntity, TypeFact, TypeLink, TypeService:
+	case TypeEntity, TypeFact, TypeLink:
 		return 2, true
 	case TypeError:
 		return 1, true

@@ -17,7 +17,6 @@ func TestParseRecord(t *testing.T) {
 		{"ENTITY", "ENTITY\tpet:Pet\tpet:123\r\n", Record{Type: TypeEntity, Fields: []string{"pet:Pet", "pet:123"}}},
 		{"FACT", "FACT\tpet:name\tMoko\r\n", Record{Type: TypeFact, Fields: []string{"pet:name", "Moko"}}},
 		{"LINK", "LINK\tpet:veterinarian\tgofer://vet.example:7070/pet/123\r\n", Record{Type: TypeLink, Fields: []string{"pet:veterinarian", "gofer://vet.example:7070/pet/123"}}},
-		{"SERVICE", "SERVICE\tpet:medical-record\thttps://vet.example/records/123\r\n", Record{Type: TypeService, Fields: []string{"pet:medical-record", "https://vet.example/records/123"}}},
 		{"ERROR", "ERROR\tNOT_FOUND\r\n", Record{Type: TypeError, Fields: []string{"NOT_FOUND"}}},
 	}
 
@@ -51,8 +50,13 @@ func TestParseRecordRejectsInvalidInput(t *testing.T) {
 		}
 	}
 
-	if _, err := ParseRecord("UNKNOWN\tx\ty\r\n"); !errors.Is(err, ErrUnknownRecordType) {
-		t.Errorf("ParseRecord unknown type error = %v, want ErrUnknownRecordType", err)
+	for _, line := range []string{
+		"UNKNOWN\tx\ty\r\n",
+		"SERVICE\tpet:medical-record\thttps://vet.example/records/123\r\n",
+	} {
+		if _, err := ParseRecord(line); !errors.Is(err, ErrUnknownRecordType) {
+			t.Errorf("ParseRecord(%q) error = %v, want ErrUnknownRecordType", line, err)
+		}
 	}
 }
 
