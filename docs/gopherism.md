@@ -14,17 +14,17 @@ Gopherism is not nostalgia and it is not strict historical compatibility. It is 
 
 A Gopherist design therefore treats complexity as something that must earn its place.
 
-## Descriptive and normative Gopherism
+## Descriptive and prescriptive Gopherism
 
 This document distinguishes two related ideas.
 
 **Descriptive Gopherism** asks what architectural qualities the original Gopher protocol actually embodied: small requests, finite responses, traversable information, independent servers, little presentation machinery, and a protocol simple enough to inspect directly.
 
-**Normative Gopherism** asks which of those qualities Gopher-NG deliberately chooses to preserve or strengthen for modern autonomous agents.
+**Prescriptive Gopherism** asks which of those qualities Gopher-NG deliberately chooses to preserve or strengthen for modern autonomous agents.
 
 The distinction matters. Gopher-NG does not attempt to reproduce every historical detail of Gopher. It attempts to preserve the parts of Gopher's design that remain useful when information is consumed by both humans and machines.
 
-The principles below are the normative form used when evaluating Gopher-NG design decisions.
+The principles below are the prescriptive form used when evaluating Gopher-NG design decisions. They guide project design but do not themselves define wire-level protocol conformance requirements; those requirements are stated in the Core protocol specification.
 
 ## Principles
 
@@ -94,7 +94,7 @@ When considering a new Core feature, ask these questions in order:
 4. Can it instead live in an ontology, extension, application, or another protocol?
 5. If it is omitted, does interoperability materially fail?
 
-A feature that cannot survive this test SHOULD NOT enter the Core.
+A feature that cannot survive this test should not enter the Core.
 
 This test is intentionally asymmetric. Adding a Core feature requires justification; omitting one does not.
 
