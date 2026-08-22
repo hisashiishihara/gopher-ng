@@ -1,12 +1,30 @@
 # Gopherism
 
-## Definition
+## Canonical definition
 
-**Gopherism** is the design philosophy that a network protocol should expose information with the minimum machinery necessary for a human or program to retrieve, traverse, and understand it.
+> **Gopherism is the design philosophy that a network protocol should expose information with the minimum machinery necessary for a human or program to retrieve, traverse, and understand it.**
 
-Gopherism is inspired by the original Gopher protocol, but it is not nostalgia and it is not strict historical compatibility. It is an attempt to preserve a useful design instinct: information should be reachable without forcing the client to participate in unnecessary application machinery.
+Within the Gopher-NG project, **Gopherism** has the specific meaning defined by this document.
+
+The word may appear in other contexts and projects. This document does not claim ownership of the word itself. It defines a protocol-design philosophy derived from the architectural character of Gopher and made explicit for Gopher-NG.
+
+A design, feature, or protocol may be described as **Gopherist** when it follows this philosophy. A design may violate Gopherism even when the feature in question is individually useful.
+
+Gopherism is not nostalgia and it is not strict historical compatibility. It is an attempt to preserve a useful design instinct: information should be reachable without forcing the client to participate in unnecessary application machinery.
 
 A Gopherist design therefore treats complexity as something that must earn its place.
+
+## Descriptive and normative Gopherism
+
+This document distinguishes two related ideas.
+
+**Descriptive Gopherism** asks what architectural qualities the original Gopher protocol actually embodied: small requests, finite responses, traversable information, independent servers, little presentation machinery, and a protocol simple enough to inspect directly.
+
+**Normative Gopherism** asks which of those qualities Gopher-NG deliberately chooses to preserve or strengthen for modern autonomous agents.
+
+The distinction matters. Gopher-NG does not attempt to reproduce every historical detail of Gopher. It attempts to preserve the parts of Gopher's design that remain useful when information is consumed by both humans and machines.
+
+The principles below are the normative form used when evaluating Gopher-NG design decisions.
 
 ## Principles
 
@@ -65,6 +83,20 @@ The relevant question is:
 If the answer is yes, omission is preferred.
 
 This is the central discipline of Gopherism.
+
+## The Gopherist test
+
+When considering a new Core feature, ask these questions in order:
+
+1. Does the feature provide information or traversal that cannot already be represented cleanly?
+2. Does it belong to discovery, or is it actually execution, presentation, policy, authentication, storage, or domain semantics?
+3. Does every conforming implementation need to understand it?
+4. Can it instead live in an ontology, extension, application, or another protocol?
+5. If it is omitted, does interoperability materially fail?
+
+A feature that cannot survive this test SHOULD NOT enter the Core.
+
+This test is intentionally asymmetric. Adding a Core feature requires justification; omitting one does not.
 
 ## Why this matters again
 
