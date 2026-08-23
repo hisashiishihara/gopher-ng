@@ -60,6 +60,31 @@ func WriteSelector(w io.Writer, selector string) error {
 	return writeString(w, selector+"\r\n")
 }
 
+// ReadSelector reads and validates one CRLF-terminated selector line.
+func ReadSelector(r io.Reader) (string, error) {
+	reader, ok := r.(*bufio.Reader)
+	if !ok {
+		reader = bufio.NewReader(r)
+	}
+
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return "", ErrInvalidSelector
+		}
+		return "", err
+	}
+	if !strings.HasSuffix(line, "\r\n") {
+		return "", ErrInvalidSelector
+	}
+
+	selector := strings.TrimSuffix(line, "\r\n")
+	if err := ValidateSelector(selector); err != nil {
+		return "", err
+	}
+	return selector, nil
+}
+
 // ParseRecord parses one CRLF-terminated Core record line.
 func ParseRecord(line string) (Record, error) {
 	if !strings.HasSuffix(line, "\r\n") || !utf8.ValidString(line) {
