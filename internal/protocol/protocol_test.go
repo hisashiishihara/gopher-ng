@@ -16,6 +16,7 @@ func TestParseRecord(t *testing.T) {
 	}{
 		{"ENTITY", "ENTITY\tpet:Pet\tpet:123\r\n", Record{Type: TypeEntity, Fields: []string{"pet:Pet", "pet:123"}}},
 		{"FACT", "FACT\tpet:name\tMoko\r\n", Record{Type: TypeFact, Fields: []string{"pet:name", "Moko"}}},
+		{"FACT HTTP URI", "FACT\tpet:medical-record\thttps://vet.example/records/123\r\n", Record{Type: TypeFact, Fields: []string{"pet:medical-record", "https://vet.example/records/123"}}},
 		{"LINK", "LINK\tpet:veterinarian\tgofer://vet.example:7070/pet/123\r\n", Record{Type: TypeLink, Fields: []string{"pet:veterinarian", "gofer://vet.example:7070/pet/123"}}},
 		{"ERROR", "ERROR\tNOT_FOUND\r\n", Record{Type: TypeError, Fields: []string{"NOT_FOUND"}}},
 	}
@@ -42,6 +43,9 @@ func TestParseRecordRejectsInvalidInput(t *testing.T) {
 		"ENTITY-\tpet:Pet\tpet:123\r\n",
 		"ENTITY\t\tpet:123\r\n",
 		"ENTITY\tpet:Pet\tpet:123\n",
+		"LINK\tpet:veterinarian\thttp://vet.example:7070/pet/123\r\n",
+		"LINK\tpet:veterinarian\tgofer://vet.example/pet/123\r\n",
+		"LINK\tpet:veterinarian\tgofer://vet.example:7070/pet/%ZZ\r\n",
 	}
 
 	for _, line := range tests {
@@ -57,6 +61,25 @@ func TestParseRecordRejectsInvalidInput(t *testing.T) {
 		if _, err := ParseRecord(line); !errors.Is(err, ErrUnknownRecordType) {
 			t.Errorf("ParseRecord(%q) error = %v, want ErrUnknownRecordType", line, err)
 		}
+	}
+}
+
+func TestEncodeRecordValidatesLinkURI(t *testing.T) {
+	invalid := Record{Type: TypeLink, Fields: []string{"pet:veterinarian", "http://vet.example:7070/pet/123"}}
+	if _, err := EncodeRecord(invalid); !errors.Is(err, ErrInvalidRecord) || !errors.Is(err, ErrInvalidURI) {
+		t.Fatalf("EncodeRecord() error = %v, want ErrInvalidRecord and ErrInvalidURI", err)
+	}
+
+	fact := Record{Type: TypeFact, Fields: []string{"pet:medical-record", "https://vet.example/records/123"}}
+	if _, err := EncodeRecord(fact); err != nil {
+		t.Fatalf("EncodeRecord(FACT) error = %v", err)
+	}
+}
+
+func TestParseRecordInvalidLinkErrorChain(t *testing.T) {
+	_, err := ParseRecord("LINK\tpet:veterinarian\thttp://vet.example:7070/pet/123\r\n")
+	if !errors.Is(err, ErrInvalidRecord) || !errors.Is(err, ErrInvalidURI) {
+		t.Fatalf("ParseRecord() error = %v, want ErrInvalidRecord and ErrInvalidURI", err)
 	}
 }
 
