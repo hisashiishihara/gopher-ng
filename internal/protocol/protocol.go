@@ -89,6 +89,11 @@ func ParseRecord(line string) (Record, error) {
 			return Record{}, ErrInvalidRecord
 		}
 	}
+	if recordType == TypeLink {
+		if _, err := ParseURI(parts[2]); err != nil {
+			return Record{}, fmt.Errorf("%w: %w", ErrInvalidRecord, err)
+		}
+	}
 
 	return Record{Type: recordType, Fields: append([]string(nil), parts[1:]...)}, nil
 }
@@ -108,6 +113,11 @@ func EncodeRecord(record Record) (string, error) {
 	for _, field := range record.Fields {
 		if field == "" || !utf8.ValidString(field) || strings.ContainsAny(field, "\t\r\n") {
 			return "", ErrInvalidRecord
+		}
+	}
+	if record.Type == TypeLink {
+		if _, err := ParseURI(record.Fields[1]); err != nil {
+			return "", fmt.Errorf("%w: %w", ErrInvalidRecord, err)
 		}
 	}
 
