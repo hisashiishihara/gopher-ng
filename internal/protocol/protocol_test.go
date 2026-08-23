@@ -105,6 +105,50 @@ func TestWriteSelector(t *testing.T) {
 	}
 }
 
+func TestReadSelector(t *testing.T) {
+	tests := []struct {
+		name string
+		wire string
+		want string
+	}{
+		{"root", "/\r\n", "/"},
+		{"path", "/pet/123\r\n", "/pet/123"},
+		{"UTF-8", "/pet/猫\r\n", "/pet/猫"},
+		{"spaces", "/pet/Moko Chan\r\n", "/pet/Moko Chan"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := ReadSelector(strings.NewReader(test.wire))
+			if err != nil {
+				t.Fatalf("ReadSelector() error = %v", err)
+			}
+			if got != test.want {
+				t.Fatalf("ReadSelector() = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestReadSelectorRejectsInvalidInput(t *testing.T) {
+	tests := []string{
+		"pet/123\r\n",
+		"/pet/123\n",
+		"/pet/123",
+		"/pet\t123\r\n",
+		"/pet\r123\r\n",
+		"/pet\n123\r\n",
+		"/pet\x00123\r\n",
+		"/pet/\xff\r\n",
+	}
+
+	for _, wire := range tests {
+		if _, err := ReadSelector(strings.NewReader(wire)); !errors.Is(err, ErrInvalidSelector) {
+			t.Errorf("ReadSelector(%q) error = %v, want ErrInvalidSelector", wire, err)
+		}
+	}
+}
+
 func TestParseResponse(t *testing.T) {
 	t.Run("complete", func(t *testing.T) {
 		response := "ENTITY\tpet:Pet\tpet:123\r\nFACT\tpet:name\tMoko\r\n.\r\n"
