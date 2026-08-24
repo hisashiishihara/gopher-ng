@@ -4,6 +4,8 @@
 
 Gopher-NG is a minimal federated semantic discovery protocol for autonomous agents, inspired by [RFC 1436](https://www.rfc-editor.org/rfc/rfc1436).
 
+> **Status: experimental.** This repository contains a minimal Gopher-NG v0.0.1 Core reference implementation.
+
 It is not an attempt to recreate the 1990s Internet for nostalgia's sake. Gopher-NG starts from a different observation: modern software agents often need a small, traversable information space, while the modern Web frequently requires them to cross layers of presentation, application state, scripting, and framework machinery before reaching the information itself.
 
 Gopher already had an interesting property: a server exposed a navigable information space through a deliberately small protocol. Gopher-NG asks what that idea looks like when the primary consumer may be an autonomous agent.
@@ -59,6 +61,42 @@ connection close
 Protocol details are in [docs/protocol.md](docs/protocol.md).
 
 Go implementation entry points live in `cmd/gng` and `cmd/gngd`, with shared protocol code in `internal/protocol`.
+
+## Quick start
+
+In one terminal, start the reference daemon:
+
+```text
+go run ./cmd/gngd -listen 127.0.0.1:7070
+```
+
+In another terminal, retrieve the root resource:
+
+```text
+go run ./cmd/gng gofer://127.0.0.1:7070/
+```
+
+```text
+ENTITY	gopher-ng:Server	gopher-ng:root
+```
+
+An unknown valid selector returns a Core error response:
+
+```text
+go run ./cmd/gng gofer://127.0.0.1:7070/missing
+```
+
+```text
+ERROR	NOT_FOUND
+```
+
+`127.0.0.1:7070` is a reference-implementation/development default. Gopher-NG v0.0.1 defines no protocol default port.
+
+The reference implementation supports the minimal v0.0.1 transaction: an absolute `gofer://` URI with explicit host and port, one selector, one Core response with an explicit terminator, and connection close. It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive LINK following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The current reference client does not automatically follow LINK records or impose an explicit response-size limit.
+
+## License
+
+Licensed under the [BSD 3-Clause License](LICENSE).
 
 ## Design direction
 
