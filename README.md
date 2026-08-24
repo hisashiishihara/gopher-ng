@@ -103,6 +103,8 @@ ERROR	NOT_FOUND
 
 The reference implementation supports the minimal v0.0.1 transaction: an absolute `gofer://` URI with explicit host and port, one selector, one Core response with an explicit terminator, and connection close. It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive LINK following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The current reference client does not automatically follow LINK records or impose an explicit response-size limit.
 
+For an optional private-network deployment example, see [Gopher-NG over Tailscale](docs/tailscale.md).
+
 ## License
 
 Licensed under the [BSD 3-Clause License](LICENSE).
