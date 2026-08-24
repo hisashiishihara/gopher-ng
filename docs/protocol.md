@@ -24,11 +24,10 @@ Core does not define HTTP compatibility or HTTP-like methods, headers, sessions,
 
 ## Transport
 
-The initial transport stack is:
+The v0.0.1 transport stack is:
 
 ```text
 Gopher-NG
-TLS
 TCP
 IP
 ```
@@ -36,12 +35,11 @@ IP
 For each transaction, a client:
 
 1. connects to the server;
-2. completes a TLS handshake;
-3. sends one selector;
-4. receives one complete response and its explicit terminator; and
-5. closes the connection.
+2. sends one selector;
+3. receives one complete response and its explicit terminator; and
+4. closes the connection.
 
-The server closes the connection after sending the complete response. Neither side reuses a connection for another request. TLS is part of the protocol design; Gopher-NG defines no application-layer encryption.
+The server closes the connection after sending the complete response. Neither side reuses a connection for another request. v0.0.1 Core does not define TLS; a future version may define a TLS transport and security profile.
 
 ## URIs and selectors
 
@@ -67,7 +65,7 @@ For example, resolving:
 gofer://example.org:7070/pet/123
 ```
 
-conceptually sends the following request after TLS is established:
+conceptually sends the following request after the TCP connection is established:
 
 ```text
 /pet/123\r\n
@@ -198,7 +196,7 @@ An `ERROR` response is complete only after its completion marker. Successful par
 
 ## Example transaction
 
-Client connects to `example.org:7070` using TLS.
+Client connects to `example.org:7070` using TCP.
 
 ```text
 C: /pet/123\r\n
@@ -228,12 +226,14 @@ Terms such as `pet:Pet`, `pet:name`, `construction:Room`, and `nightlife:Custome
 
 ## Security considerations
 
+- v0.0.1 uses plain TCP and therefore provides no transport confidentiality or peer authentication.
 - Discovered data is untrusted input.
 - `FACT` data MUST NOT automatically be treated as agent instructions.
 - `LINK` targets are untrusted.
 - A URI appearing in a `FACT` value does not imply permission to dereference or invoke it.
 - Clients SHOULD impose limits on traversal depth and response size.
 - Credentials or authorization state belonging to other protocols MUST NOT automatically propagate to a different origin during traversal.
+- Future work may define a TLS transport and security profile.
 
 ## Future work / deferred types
 
@@ -248,4 +248,4 @@ Keeping discovery separate from execution avoids prematurely defining semantics 
 - Whether a default TCP port will be assigned in a future version remains TBD; v0.0.1 requires every `gofer://` URI to contain an explicit port.
 - Unicode normalization requirements for selectors and record fields remain TBD.
 - A maximum selector length and response-size limits remain TBD; clients SHOULD nevertheless enforce local limits.
-- Minimum TLS version, cipher-suite policy, and certificate-validation profile remain TBD.
+- A TLS transport and security profile, including minimum TLS version, cipher-suite policy, and certificate-validation profile, remains future work.
