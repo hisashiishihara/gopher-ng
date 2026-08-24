@@ -2,6 +2,8 @@
 
 > The Web evolved for humans. Gopher may have been waiting for machines.
 
+**[GOFER's Ambition](docs/gofers-ambition.md)**
+
 Gopher-NG is a minimal federated semantic discovery protocol for autonomous agents, inspired by [RFC 1436](https://www.rfc-editor.org/rfc/rfc1436).
 
 > **Status: experimental.** This repository contains a minimal Gopher-NG v0.0.1 Core reference implementation.
