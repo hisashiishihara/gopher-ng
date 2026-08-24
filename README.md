@@ -66,6 +66,13 @@ Go implementation entry points live in `cmd/gng` and `cmd/gngd`, with shared pro
 
 ## Quick start
 
+Clone the repository:
+
+```text
+git clone https://github.com/hisashiishihara/gopher-ng.git
+cd gopher-ng
+```
+
 In one terminal, start the reference daemon:
 
 ```text
