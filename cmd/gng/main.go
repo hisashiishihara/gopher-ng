@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -11,6 +12,10 @@ import (
 
 	"github.com/hisashiishihara/gopher-ng/internal/protocol"
 )
+
+const maxResponseSize int64 = 1 << 20
+
+var errResponseTooLarge = errors.New("response too large")
 
 func main() {
 	if err := run(os.Args[1:], os.Stdout); err != nil {
@@ -46,7 +51,33 @@ func fetch(rawURI string) ([]protocol.Record, error) {
 	if err := protocol.WriteSelector(conn, uri.Selector); err != nil {
 		return nil, err
 	}
-	return protocol.ParseResponse(conn)
+	return parseResponse(conn)
+}
+
+func parseResponse(r io.Reader) ([]protocol.Record, error) {
+	return protocol.ParseResponse(&boundedResponseReader{r: r, remaining: maxResponseSize})
+}
+
+type boundedResponseReader struct {
+	r         io.Reader
+	remaining int64
+}
+
+func (r *boundedResponseReader) Read(p []byte) (int, error) {
+	if r.remaining == 0 {
+		var probe [1]byte
+		n, err := r.r.Read(probe[:])
+		if n > 0 {
+			return 0, errResponseTooLarge
+		}
+		return 0, err
+	}
+	if int64(len(p)) > r.remaining {
+		p = p[:r.remaining]
+	}
+	n, err := r.r.Read(p)
+	r.remaining -= int64(n)
+	return n, err
 }
 
 func dialAddress(uri protocol.URI) string {

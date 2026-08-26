@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hisashiishihara/gopher-ng/internal/protocol"
@@ -105,6 +106,30 @@ func TestFetchRejectsIncompleteResponse(t *testing.T) {
 	if err := <-serverErr; err != nil {
 		t.Fatalf("test server error = %v", err)
 	}
+}
+
+func TestParseResponseSizeLimit(t *testing.T) {
+	const framingSize = len("FACT\tkey\t") + len("\r\n") + len(".\r\n")
+	field := strings.Repeat("x", int(maxResponseSize)-framingSize)
+
+	t.Run("exactly at limit", func(t *testing.T) {
+		response := "FACT\tkey\t" + field + "\r\n.\r\n"
+		records, err := parseResponse(strings.NewReader(response))
+		if err != nil {
+			t.Fatalf("parseResponse() error = %v", err)
+		}
+		want := []protocol.Record{{Type: protocol.TypeFact, Fields: []string{"key", field}}}
+		if !reflect.DeepEqual(records, want) {
+			t.Fatalf("parseResponse() returned unexpected records")
+		}
+	})
+
+	t.Run("one wire byte over limit", func(t *testing.T) {
+		response := "FACT\tkey\t" + field + "x\r\n.\r\n"
+		if _, err := parseResponse(strings.NewReader(response)); !errors.Is(err, errResponseTooLarge) {
+			t.Fatalf("parseResponse() error = %v, want errResponseTooLarge", err)
+		}
+	})
 }
 
 func TestDialAddress(t *testing.T) {

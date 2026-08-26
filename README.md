@@ -101,7 +101,7 @@ ERROR	NOT_FOUND
 
 `127.0.0.1:7070` is a reference-implementation/development default. Gopher-NG v0.0.1 defines no protocol default port.
 
-The reference implementation supports the minimal v0.0.1 transaction: an absolute `gofer://` URI with explicit host and port, one selector, one Core response with an explicit terminator, and connection close. It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive LINK following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The current reference client does not automatically follow LINK records or impose an explicit response-size limit.
+The reference implementation supports the minimal v0.0.1 transaction: an absolute `gofer://` URI with explicit host and port, one selector, one Core response with an explicit terminator, and connection close. It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive LINK following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The current reference client does not automatically follow LINK records. As a client safety policy, it limits a complete Core response to 1 MiB (1,048,576 wire bytes), including record framing and the completion marker; Gopher-NG v0.0.1 itself defines no protocol response-size limit.
 
 For an optional private-network deployment example, see [Gopher-NG over Tailscale](docs/tailscale.md).
 
