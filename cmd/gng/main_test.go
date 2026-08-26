@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/hisashiishihara/gopher-ng/internal/protocol"
@@ -104,6 +105,36 @@ func TestFetchRejectsIncompleteResponse(t *testing.T) {
 	}
 	if err := <-serverErr; err != nil {
 		t.Fatalf("test server error = %v", err)
+	}
+}
+
+func TestParseResponseWithinLimit(t *testing.T) {
+	wire := "FACT\tpet:name\tMoko\r\n.\r\n"
+	want := []protocol.Record{{Type: protocol.TypeFact, Fields: []string{"pet:name", "Moko"}}}
+
+	records, err := parseResponse(strings.NewReader(wire))
+	if err != nil {
+		t.Fatalf("parseResponse() error = %v", err)
+	}
+	if !reflect.DeepEqual(records, want) {
+		t.Fatalf("parseResponse() = %#v, want %#v", records, want)
+	}
+}
+
+func TestParseResponseWireByteLimit(t *testing.T) {
+	const framingBytes = len("FACT\tk\t") + len("\r\n") + len(".\r\n")
+	atLimit := "FACT\tk\t" + strings.Repeat("x", int(maxResponseSize)-framingBytes) + "\r\n.\r\n"
+
+	if got := int64(len(atLimit)); got != maxResponseSize {
+		t.Fatalf("test response size = %d, want %d", got, maxResponseSize)
+	}
+	if _, err := parseResponse(strings.NewReader(atLimit)); err != nil {
+		t.Fatalf("parseResponse(at limit) error = %v", err)
+	}
+
+	overLimit := strings.Replace(atLimit, "\r\n.\r\n", "x\r\n.\r\n", 1)
+	if _, err := parseResponse(strings.NewReader(overLimit)); !errors.Is(err, errResponseTooLarge) {
+		t.Fatalf("parseResponse(over limit) error = %v, want errResponseTooLarge", err)
 	}
 }
 
