@@ -21,9 +21,9 @@ gofer://animals.example:7070/dog/123
 and receives a finite semantic description:
 
 ```text
-ENTITY\tanimal:Dog\tanimal:dog-123
-FACT\tanimal:name\tMoko
-LINK\tanimal:owner\tgofer://people.example:7070/person/456
+ENTITY	animal:Dog	animal:dog-123
+FACT	animal:name	Moko
+LINK	animal:owner	gofer://people.example:7070/person/456
 ```
 
 The `LINK` points to another Gopher-NG resource, which may be served by a completely independent operator.
@@ -102,7 +102,7 @@ go run ./cmd/gng gofer://127.0.0.1:7070/
 ```
 
 ```text
-ENTITY\tgopher-ng:Server\tgopher-ng:root
+ENTITY	gopher-ng:Server	gopher-ng:root
 ```
 
 An unknown valid selector returns a Core error response:
@@ -112,7 +112,7 @@ go run ./cmd/gng gofer://127.0.0.1:7070/missing
 ```
 
 ```text
-ERROR\tNOT_FOUND
+ERROR	NOT_FOUND
 ```
 
 `127.0.0.1:7070` is a reference-implementation/development default. Gopher-NG v0.0.1 defines no protocol default port.
@@ -142,8 +142,8 @@ go run ./cmd/gng gofer://127.0.0.1:7070/
 ```
 
 ```text
-ENTITY\texample:Directory\texample:federation-root
-LINK\trelated\tgofer://127.0.0.1:7071/resource
+ENTITY	example:Directory	example:federation-root
+LINK	related	gofer://127.0.0.1:7071/resource
 ```
 
 Follow the returned link:
@@ -153,8 +153,8 @@ go run ./cmd/gng gofer://127.0.0.1:7071/resource
 ```
 
 ```text
-ENTITY\texample:Resource\texample:federation-target
-FACT\texample:message\tHello from server B
+ENTITY	example:Resource	example:federation-target
+FACT	example:message	Hello from server B
 ```
 
 That is the federation model: independent servers, explicit semantic links, and no Web application stack or central registry required.
