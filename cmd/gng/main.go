@@ -46,7 +46,7 @@ func fetch(rawURI string) ([]protocol.Record, error) {
 	if err := protocol.WriteSelector(conn, uri.Selector); err != nil {
 		return nil, err
 	}
-	return protocol.ParseResponse(conn)
+	return protocol.ParseResponseWithLimit(conn, protocol.DefaultMaxResponseBytes)
 }
 
 func dialAddress(uri protocol.URI) string {

@@ -3,6 +3,7 @@ package protocol
 import (
 	"bytes"
 	"errors"
+	"io"
 	"reflect"
 	"strings"
 	"testing"
@@ -149,6 +150,24 @@ func TestReadSelectorRejectsInvalidInput(t *testing.T) {
 	}
 }
 
+func TestReadSelectorLimit(t *testing.T) {
+	exact := "/" + strings.Repeat("a", int(DefaultMaxSelectorBytes)-3) + "\r\n"
+	selector, err := ReadSelector(strings.NewReader(exact))
+	if err != nil || selector != strings.TrimSuffix(exact, "\r\n") {
+		t.Fatalf("ReadSelector(exact) = %q, %v", selector, err)
+	}
+
+	for _, wire := range []string{
+		"/" + strings.Repeat("a", int(DefaultMaxSelectorBytes)-2) + "\r\n",
+		"/" + strings.Repeat("a", int(DefaultMaxSelectorBytes)),
+	} {
+		_, err := ReadSelector(strings.NewReader(wire))
+		if !errors.Is(err, ErrSelectorTooLarge) || !errors.Is(err, ErrInvalidSelector) {
+			t.Fatalf("ReadSelector(oversize) error = %v", err)
+		}
+	}
+}
+
 func TestParseResponse(t *testing.T) {
 	t.Run("complete", func(t *testing.T) {
 		response := "ENTITY\tpet:Pet\tpet:123\r\nFACT\tpet:name\tMoko\r\n.\r\n"
@@ -220,6 +239,84 @@ func TestParseResponse(t *testing.T) {
 			t.Fatalf("ParseResponse() error = %v, want ErrUnknownRecordType", err)
 		}
 	})
+}
+
+func TestParseResponseWithLimitBoundaries(t *testing.T) {
+	record := "FACT\tpet:name\tMoko\r\n"
+	response := record + ".\r\n"
+
+	records, err := ParseResponseWithLimit(strings.NewReader(response), int64(len(response)))
+	if err != nil || len(records) != 1 {
+		t.Fatalf("exact limit = %#v, %v", records, err)
+	}
+	if records, err := ParseResponseWithLimit(strings.NewReader(".\r\n"), 3); err != nil || len(records) != 0 {
+		t.Fatalf("empty exact minimum = %#v, %v", records, err)
+	}
+
+	for _, test := range []struct {
+		name  string
+		wire  string
+		limit int64
+		want  error
+	}{
+		{"one byte over", response, int64(len(response) - 1), ErrResponseTooLarge},
+		{"terminator crossing boundary", response, int64(len(response) - 2), ErrResponseTooLarge},
+		{"missing below limit", record, int64(len(record) + 1), ErrIncompleteResponse},
+		{"missing exactly at limit", record, int64(len(record)), ErrIncompleteResponse},
+		{"max plus one unterminated", strings.Repeat("x", 9), 8, ErrResponseTooLarge},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			records, err := ParseResponseWithLimit(strings.NewReader(test.wire), test.limit)
+			if !errors.Is(err, test.want) || records != nil {
+				t.Fatalf("got %#v, %v; want nil, %v", records, err, test.want)
+			}
+		})
+	}
+
+	for _, limit := range []int64{0, -1} {
+		if records, err := ParseResponseWithLimit(strings.NewReader(".\r\n"), limit); err == nil || records != nil {
+			t.Fatalf("limit %d = %#v, %v; want programmer error", limit, records, err)
+		}
+	}
+}
+
+func TestParseResponseWithLimitAggregateAndNoPartialRecords(t *testing.T) {
+	line := "FACT\tk\tv\r\n"
+	wire := strings.Repeat(line, 64) + ".\r\n"
+	if records, err := ParseResponseWithLimit(strings.NewReader(wire), int64(len(wire))); err != nil || len(records) != 64 {
+		t.Fatalf("aggregate exact = %d records, %v", len(records), err)
+	}
+	if records, err := ParseResponseWithLimit(strings.NewReader(wire), int64(len(wire)-1)); !errors.Is(err, ErrResponseTooLarge) || records != nil {
+		t.Fatalf("aggregate over = %#v, %v", records, err)
+	}
+
+	malformed := line + "UNKNOWN\tx\ty\r\n" + strings.Repeat("z", 100)
+	records, err := ParseResponseWithLimit(strings.NewReader(malformed), 32)
+	if records != nil || !errors.Is(err, ErrInvalidResponse) || !errors.Is(err, ErrUnknownRecordType) {
+		t.Fatalf("malformed prefix = %#v, %v", records, err)
+	}
+}
+
+func TestParseResponseWithLimitLongLineReadsAtMostMaxPlusOne(t *testing.T) {
+	r := &countingReader{reader: strings.NewReader(strings.Repeat("x", 1<<20))}
+	records, err := ParseResponseWithLimit(r, 128)
+	if records != nil || !errors.Is(err, ErrResponseTooLarge) {
+		t.Fatalf("long line = %#v, %v", records, err)
+	}
+	if r.bytesRead != 129 {
+		t.Fatalf("bytes read = %d, want 129", r.bytesRead)
+	}
+}
+
+type countingReader struct {
+	reader    io.Reader
+	bytesRead int
+}
+
+func (r *countingReader) Read(p []byte) (int, error) {
+	n, err := r.reader.Read(p)
+	r.bytesRead += n
+	return n, err
 }
 
 func TestEncodeParseRoundTrip(t *testing.T) {

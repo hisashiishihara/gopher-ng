@@ -107,6 +107,46 @@ func TestFetchRejectsIncompleteResponse(t *testing.T) {
 	}
 }
 
+func TestFetchRejectsOversizedResponse(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	defer listener.Close()
+
+	serverErr := make(chan error, 1)
+	go func() {
+		conn, err := listener.Accept()
+		if err != nil {
+			serverErr <- err
+			return
+		}
+		defer conn.Close()
+		_, err = protocol.ReadSelector(conn)
+		if err == nil {
+			_, _ = io.CopyN(conn, zeroReader{}, protocol.DefaultMaxResponseBytes+1)
+		}
+		serverErr <- err
+	}()
+
+	records, err := fetch("gofer://" + listener.Addr().String() + "/")
+	if records != nil || !errors.Is(err, protocol.ErrResponseTooLarge) {
+		t.Fatalf("fetch() = %#v, %v; want ErrResponseTooLarge", records, err)
+	}
+	if err := <-serverErr; err != nil {
+		t.Fatalf("test server error = %v", err)
+	}
+}
+
+type zeroReader struct{}
+
+func (zeroReader) Read(p []byte) (int, error) {
+	for i := range p {
+		p[i] = 'x'
+	}
+	return len(p), nil
+}
+
 func TestDialAddress(t *testing.T) {
 	uri, err := protocol.ParseURI("gofer://[2001:db8::1]:7070/")
 	if err != nil {

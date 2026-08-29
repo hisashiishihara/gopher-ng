@@ -21,6 +21,17 @@ var (
 	ErrInvalidResponse = errors.New("invalid response")
 	// ErrIncompleteResponse indicates EOF before the response completion marker.
 	ErrIncompleteResponse = errors.New("incomplete response")
+	// ErrResponseTooLarge indicates a response exceeded the configured local limit.
+	ErrResponseTooLarge = errors.New("response too large")
+	// ErrSelectorTooLarge indicates a selector exceeded the server's local limit.
+	ErrSelectorTooLarge = errors.New("selector too large")
+)
+
+const (
+	// DefaultMaxResponseBytes is the reference client's inbound wire-byte budget.
+	DefaultMaxResponseBytes int64 = 1 << 20
+	// DefaultMaxSelectorBytes is the Go server's inbound selector wire-byte budget.
+	DefaultMaxSelectorBytes int64 = 4 << 10
 )
 
 // RecordType identifies a Gopher-NG Core record type.
@@ -62,13 +73,12 @@ func WriteSelector(w io.Writer, selector string) error {
 
 // ReadSelector reads and validates one CRLF-terminated selector line.
 func ReadSelector(r io.Reader) (string, error) {
-	reader, ok := r.(*bufio.Reader)
-	if !ok {
-		reader = bufio.NewReader(r)
-	}
-
-	line, err := reader.ReadString('\n')
+	reader := newBoundedLineReader(r, DefaultMaxSelectorBytes)
+	line, err := reader.readLine()
 	if err != nil {
+		if errors.Is(err, errBoundedReadTooLarge) {
+			return "", fmt.Errorf("%w: %w", ErrInvalidSelector, ErrSelectorTooLarge)
+		}
 		if errors.Is(err, io.EOF) {
 			return "", ErrInvalidSelector
 		}
@@ -151,12 +161,40 @@ func EncodeRecord(record Record) (string, error) {
 
 // ParseResponse parses a complete response ending in the required completion marker.
 func ParseResponse(r io.Reader) ([]Record, error) {
-	reader := bufio.NewReader(r)
+	return parseResponse(&bufioLineReader{reader: bufio.NewReader(r)})
+}
+
+// ParseResponseWithLimit parses a complete response while enforcing a positive
+// total wire-byte limit. The completion marker and all CRLF bytes count toward
+// the limit.
+func ParseResponseWithLimit(r io.Reader, maxBytes int64) ([]Record, error) {
+	if maxBytes <= 0 {
+		return nil, fmt.Errorf("response byte limit must be positive: %d", maxBytes)
+	}
+	return parseResponse(newBoundedLineReader(r, maxBytes))
+}
+
+type lineReader interface {
+	readLine() (string, error)
+}
+
+type bufioLineReader struct {
+	reader *bufio.Reader
+}
+
+func (r *bufioLineReader) readLine() (string, error) {
+	return r.reader.ReadString('\n')
+}
+
+func parseResponse(reader lineReader) ([]Record, error) {
 	var records []Record
 
 	for {
-		line, err := reader.ReadString('\n')
+		line, err := reader.readLine()
 		if err != nil {
+			if errors.Is(err, errBoundedReadTooLarge) {
+				return nil, ErrResponseTooLarge
+			}
 			if errors.Is(err, io.EOF) {
 				return nil, ErrIncompleteResponse
 			}
@@ -181,6 +219,29 @@ func ParseResponse(r io.Reader) ([]Record, error) {
 		}
 		records = append(records, record)
 	}
+}
+
+var errBoundedReadTooLarge = errors.New("bounded read too large")
+
+type boundedLineReader struct {
+	reader   *bufio.Reader
+	maxBytes int64
+	consumed int64
+}
+
+func newBoundedLineReader(r io.Reader, maxBytes int64) *boundedLineReader {
+	// Exposing max+1 bytes distinguishes overflow from EOF at the exact limit.
+	limited := io.LimitReader(r, maxBytes+1)
+	return &boundedLineReader{reader: bufio.NewReader(limited), maxBytes: maxBytes}
+}
+
+func (r *boundedLineReader) readLine() (string, error) {
+	line, err := r.reader.ReadString('\n')
+	r.consumed += int64(len(line))
+	if r.consumed > r.maxBytes {
+		return "", errBoundedReadTooLarge
+	}
+	return line, err
 }
 
 // WriteResponse writes records followed by the required completion marker.

@@ -240,7 +240,7 @@ See [`docs/gopherism.md`](docs/gopherism.md) for the longer design rationale and
 
 The current reference implementation supports the minimal v0.0.1 transaction: an absolute `gofer://` URI with explicit host and port, one selector, one Core response with an explicit terminator, and connection close.
 
-It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive `LINK` following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The current reference client does not automatically follow `LINK` records or impose an explicit response-size limit.
+It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive `LINK` following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The Go reference client enforces a local 1 MiB inbound response limit and does not automatically follow `LINK` records. The Go server also applies a local 4 KiB selector-line safeguard. These are implementation policies, not Core protocol maxima.
 
 For an optional private-network deployment example, see [Gopher-NG over Tailscale](docs/tailscale.md).
 

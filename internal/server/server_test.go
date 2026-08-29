@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -145,6 +146,37 @@ func TestServeConnProcessesOneSelector(t *testing.T) {
 		t.Fatalf("handler calls = %d, want 1", got)
 	}
 	if err := <-errCh; err != nil {
+		t.Fatalf("ServeConn() error = %v", err)
+	}
+}
+
+func TestServeConnRejectsOversizedSelector(t *testing.T) {
+	serverConn, clientConn := net.Pipe()
+	var calls int32
+	errCh := make(chan error, 1)
+	go func() {
+		errCh <- ServeConn(serverConn, func(string) ([]protocol.Record, error) {
+			atomic.AddInt32(&calls, 1)
+			return nil, nil
+		})
+	}()
+
+	request := "/" + strings.Repeat("a", int(protocol.DefaultMaxSelectorBytes))
+	if _, err := io.WriteString(clientConn, request); err != nil {
+		t.Fatalf("write request: %v", err)
+	}
+	response, err := io.ReadAll(clientConn)
+	if err != nil {
+		t.Fatalf("read response: %v", err)
+	}
+	if got, want := string(response), "ERROR\tBAD_SELECTOR\r\n.\r\n"; got != want {
+		t.Fatalf("response = %q, want %q", got, want)
+	}
+	if got := atomic.LoadInt32(&calls); got != 0 {
+		t.Fatalf("handler calls = %d, want 0", got)
+	}
+	err = <-errCh
+	if !errors.Is(err, protocol.ErrSelectorTooLarge) || !errors.Is(err, protocol.ErrInvalidSelector) {
 		t.Fatalf("ServeConn() error = %v", err)
 	}
 }
