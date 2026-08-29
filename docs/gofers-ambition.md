@@ -81,3 +81,16 @@ Gopher-NG does not need broad adoption to test the idea.
 If two independently operated servers can expose semantic resources,
 and a client can traverse between them without requiring a Web application
 stack, the basic model is already worth evaluating.
+
+**Status: demonstrated.** The [two-server federation proof](../examples/federation/README.md)
+shows independently running servers exposing semantic resources and a client
+manually following an ordinary `LINK` between them. The [separate-host
+validation](tailscale.md) demonstrates the same traversal between independently
+operated Linux hosts. Together, this evidence satisfies the small technical
+criterion without a Web application stack or a Core extension.
+
+This is evidence for discovery and manual traversal, not execution. It does not
+demonstrate automatic or recursive traversal, service execution, TLS or
+authentication in Core, a central registry, or protocol changes. With the small
+technical criterion met, the remaining question is how useful this model is in
+real-world evaluation.
