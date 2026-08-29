@@ -5,6 +5,8 @@
 **A tiny federated discovery protocol for autonomous agents: semantic resources, traversable links, and no Web application stack.**
 
 > **Status: experimental.** This repository contains the Gopher-NG v0.0.1 Core protocol and reference implementation.
+>
+> **Naming:** `Gopher-NG` is the project name. The `gofer://` URI scheme and `GOFER` spelling used in project terminology are intentional, not typos.
 
 **[GOFER's Ambition](docs/gofers-ambition.md)** · **[Core protocol](docs/protocol.md)** · **[Gopherism](docs/gopherism.md)** · **[Federation proof](examples/federation/README.md)** · **[Python interoperability proof](interop/python/README.md)**
 
@@ -19,9 +21,9 @@ gofer://animals.example:7070/dog/123
 and receives a finite semantic description:
 
 ```text
-ENTITY	animal:Dog	animal:dog-123
-FACT	animal:name	Moko
-LINK	animal:owner	gofer://people.example:7070/person/456
+ENTITY\tanimal:Dog\tanimal:dog-123
+FACT\tanimal:name\tMoko
+LINK\tanimal:owner\tgofer://people.example:7070/person/456
 ```
 
 The `LINK` points to another Gopher-NG resource, which may be served by a completely independent operator.
@@ -100,7 +102,7 @@ go run ./cmd/gng gofer://127.0.0.1:7070/
 ```
 
 ```text
-ENTITY	gopher-ng:Server	gopher-ng:root
+ENTITY\tgopher-ng:Server\tgopher-ng:root
 ```
 
 An unknown valid selector returns a Core error response:
@@ -110,7 +112,7 @@ go run ./cmd/gng gofer://127.0.0.1:7070/missing
 ```
 
 ```text
-ERROR	NOT_FOUND
+ERROR\tNOT_FOUND
 ```
 
 `127.0.0.1:7070` is a reference-implementation/development default. Gopher-NG v0.0.1 defines no protocol default port.
@@ -140,8 +142,8 @@ go run ./cmd/gng gofer://127.0.0.1:7070/
 ```
 
 ```text
-ENTITY	example:Directory	example:federation-root
-LINK	related	gofer://127.0.0.1:7071/resource
+ENTITY\texample:Directory\texample:federation-root
+LINK\trelated\tgofer://127.0.0.1:7071/resource
 ```
 
 Follow the returned link:
@@ -151,8 +153,8 @@ go run ./cmd/gng gofer://127.0.0.1:7071/resource
 ```
 
 ```text
-ENTITY	example:Resource	example:federation-target
-FACT	example:message	Hello from server B
+ENTITY\texample:Resource\texample:federation-target
+FACT\texample:message\tHello from server B
 ```
 
 That is the federation model: independent servers, explicit semantic links, and no Web application stack or central registry required.
