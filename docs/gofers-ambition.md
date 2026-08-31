@@ -92,5 +92,7 @@ criterion without a Web application stack or a Core extension.
 This is evidence for discovery and manual traversal, not execution. It does not
 demonstrate automatic or recursive traversal, service execution, TLS or
 authentication in Core, a central registry, or protocol changes. With the small
-technical criterion met, the remaining question is how useful this model is in
-real-world evaluation.
+technical criterion met, the experimental v0.0.1 mission is complete. The
+repository is now dormant and follows the maintenance-only lifecycle policy in
+the [README](../README.md#lifecycle-and-maintenance); this result does not imply
+a speculative feature roadmap or production-security readiness.
