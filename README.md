@@ -4,7 +4,9 @@
 
 **A tiny federated discovery protocol for autonomous agents: semantic resources, traversable links, and no Web application stack.**
 
-> **Status: experimental.** This repository contains the Gopher-NG v0.0.1 Core protocol and reference implementation.
+> **Status: experimental; mission complete; dormant/maintenance-only.** The Gopher-NG v0.0.1 experiment has met its [documented success criterion](docs/gofers-ambition.md#a-small-success-criterion). This repository is retained as an experimental reference and is not production-ready or suitable for security-sensitive use.
+>
+> **Versioning:** The protocol specified here remains **Gopher-NG Core v0.0.1**. Later repository or reference-implementation tags do not define later protocol versions.
 >
 > **Naming:** `Gopher-NG` is the project name. The `gofer://` URI scheme and `GOFER` spelling used in project terminology are intentional, not typos.
 
@@ -245,6 +247,27 @@ The current reference implementation supports the minimal v0.0.1 transaction: an
 It uses plain TCP. It does not implement TLS, authentication, automatic traversal, recursive `LINK` following, service execution, MCP, ontology interpretation, persistence, or discovery registries. The Go reference client enforces a local 1 MiB inbound response limit and does not automatically follow `LINK` records. The Go server also applies a local 4 KiB selector-line safeguard. These are implementation policies, not Core protocol maxima.
 
 For an optional private-network deployment example, see [Gopher-NG over Tailscale](docs/tailscale.md).
+
+## Lifecycle and maintenance
+
+The experimental v0.0.1 mission is complete, so the repository is dormant and maintenance-only. There is no speculative roadmap expansion. Maintenance may resume only for:
+
+- reproducible, meaningful bugs;
+- build, test, or CI failures;
+- security issues;
+- dependency or toolchain regressions;
+- protocol ambiguity demonstrated by an independent implementation;
+- compatibility regressions; or
+- explicit maintainer direction.
+
+The baseline validation commands are:
+
+```sh
+go test ./...
+python3 -m unittest discover -s interop/python -p 'test_*.py' -v
+```
+
+Maintenance does not imply expanding Core. In particular, automatic traversal and other deliberately excluded features remain out of scope unless a maintainer explicitly reopens that decision.
 
 ## License
 
