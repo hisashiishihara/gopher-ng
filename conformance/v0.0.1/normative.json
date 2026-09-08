@@ -1,0 +1,372 @@
+{
+  "core_version": "v0.0.1",
+  "vectors": [
+    {
+      "id": "root",
+      "kind": "request",
+      "wire_hex": "2f0d0a",
+      "valid": true,
+      "selector": "/"
+    },
+    {
+      "id": "unicode",
+      "kind": "request",
+      "wire_hex": "2fe78cab0d0a",
+      "valid": true,
+      "selector": "/猫"
+    },
+    {
+      "id": "unknown-selector",
+      "kind": "request",
+      "wire_hex": "2f6d697373696e670d0a",
+      "valid": true,
+      "selector": "/missing"
+    },
+    {
+      "id": "request-relative",
+      "kind": "request",
+      "wire_hex": "7065740d0a",
+      "valid": false
+    },
+    {
+      "id": "request-lf",
+      "kind": "request",
+      "wire_hex": "2f0a",
+      "valid": false
+    },
+    {
+      "id": "request-no-ending",
+      "kind": "request",
+      "wire_hex": "2f",
+      "valid": false
+    },
+    {
+      "id": "request-cr",
+      "kind": "request",
+      "wire_hex": "2f0d",
+      "valid": false
+    },
+    {
+      "id": "request-tab",
+      "kind": "request",
+      "wire_hex": "2f6109620d0a",
+      "valid": false
+    },
+    {
+      "id": "request-nul",
+      "kind": "request",
+      "wire_hex": "2f000d0a",
+      "valid": false
+    },
+    {
+      "id": "request-utf8",
+      "kind": "request",
+      "wire_hex": "2fff0d0a",
+      "valid": false
+    },
+    {
+      "id": "empty-explicit-terminator",
+      "kind": "response",
+      "wire_hex": "2e0d0a",
+      "valid": true,
+      "records": []
+    },
+    {
+      "id": "entity",
+      "kind": "response",
+      "wire_hex": "454e54495459097065743a506574097065743a3132330d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "ENTITY",
+          "pet:Pet",
+          "pet:123"
+        ]
+      ]
+    },
+    {
+      "id": "fact-unicode",
+      "kind": "response",
+      "wire_hex": "46414354097065743a6e616d6509e78cab0d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "FACT",
+          "pet:name",
+          "猫"
+        ]
+      ]
+    },
+    {
+      "id": "independent-authority-no-auto-traversal",
+      "kind": "response",
+      "wire_hex": "454e54495459097065743a506574097065743a3132330d0a46414354097065743a7265636f72640968747470733a2f2f7265636f7264732e6578616d706c652f3132330d0a4c494e4b097065743a76657409676f6665723a2f2f696e646570656e64656e742e6578616d706c653a373037312f7065742f3132330d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "ENTITY",
+          "pet:Pet",
+          "pet:123"
+        ],
+        [
+          "FACT",
+          "pet:record",
+          "https://records.example/123"
+        ],
+        [
+          "LINK",
+          "pet:vet",
+          "gofer://independent.example:7071/pet/123"
+        ]
+      ],
+      "source_authority": "origin.example:7070"
+    },
+    {
+      "id": "unknown-selector-error",
+      "kind": "response",
+      "wire_hex": "4552524f52094e4f545f464f554e440d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "ERROR",
+          "NOT_FOUND"
+        ]
+      ],
+      "request_selector": "/missing"
+    },
+    {
+      "id": "bad-selector-error",
+      "kind": "response",
+      "wire_hex": "4552524f52094241445f53454c4543544f520d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "ERROR",
+          "BAD_SELECTOR"
+        ]
+      ]
+    },
+    {
+      "id": "temporary-error",
+      "kind": "response",
+      "wire_hex": "4552524f520954454d504f524152595f4641494c5552450d0a2e0d0a",
+      "valid": true,
+      "records": [
+        [
+          "ERROR",
+          "TEMPORARY_FAILURE"
+        ]
+      ]
+    },
+    {
+      "id": "response-missing-terminator",
+      "kind": "response",
+      "wire_hex": "454e54495459096109620d0a",
+      "valid": false
+    },
+    {
+      "id": "response-error-incomplete",
+      "kind": "response",
+      "wire_hex": "4552524f52094e4f545f464f554e440d0a",
+      "valid": false
+    },
+    {
+      "id": "response-bare-dot",
+      "kind": "response",
+      "wire_hex": "2e",
+      "valid": false
+    },
+    {
+      "id": "response-lf-terminator",
+      "kind": "response",
+      "wire_hex": "2e0a",
+      "valid": false
+    },
+    {
+      "id": "response-lf-record",
+      "kind": "response",
+      "wire_hex": "46414354096109620a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-utf8",
+      "kind": "response",
+      "wire_hex": "46414354096109ff0d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-entity-arity",
+      "kind": "response",
+      "wire_hex": "454e5449545909610d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-fact-arity",
+      "kind": "response",
+      "wire_hex": "464143540961096209630d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-link-arity",
+      "kind": "response",
+      "wire_hex": "4c494e4b09610d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-error-arity",
+      "kind": "response",
+      "wire_hex": "4552524f52096109620d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-empty-field",
+      "kind": "response",
+      "wire_hex": "464143540961090d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-relative-link",
+      "kind": "response",
+      "wire_hex": "4c494e4b0961092f6e6578740d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-unknown-type",
+      "kind": "response",
+      "wire_hex": "53455256494345096109620d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-mixed-error",
+      "kind": "response",
+      "wire_hex": "4552524f52094e4f545f464f554e440d0a46414354096109620d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-error-after-record",
+      "kind": "response",
+      "wire_hex": "46414354096109620d0a4552524f52094e4f545f464f554e440d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "response-two-errors",
+      "kind": "response",
+      "wire_hex": "4552524f52094e4f545f464f554e440d0a4552524f52094e4f545f464f554e440d0a2e0d0a",
+      "valid": false
+    },
+    {
+      "id": "uri-root",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070/",
+      "valid": true,
+      "host": "example.org",
+      "port": 7070,
+      "selector": "/"
+    },
+    {
+      "id": "uri-ipv6",
+      "kind": "uri",
+      "uri": "gofer://[2001:db8::1]:7070/pet",
+      "valid": true,
+      "host": "2001:db8::1",
+      "port": 7070,
+      "selector": "/pet"
+    },
+    {
+      "id": "uri-escaped",
+      "kind": "uri",
+      "uri": "GOFER://example.org:1/Moko%20%E7%8C%AB",
+      "valid": true,
+      "host": "example.org",
+      "port": 1,
+      "selector": "/Moko 猫"
+    },
+    {
+      "id": "uri-max-port",
+      "kind": "uri",
+      "uri": "gofer://example.org:65535/",
+      "valid": true,
+      "host": "example.org",
+      "port": 65535,
+      "selector": "/"
+    },
+    {
+      "id": "uri-relative",
+      "kind": "uri",
+      "uri": "/pet",
+      "valid": false
+    },
+    {
+      "id": "uri-scheme",
+      "kind": "uri",
+      "uri": "https://example.org:7070/",
+      "valid": false
+    },
+    {
+      "id": "uri-no-port",
+      "kind": "uri",
+      "uri": "gofer://example.org/",
+      "valid": false
+    },
+    {
+      "id": "uri-no-host",
+      "kind": "uri",
+      "uri": "gofer://:7070/",
+      "valid": false
+    },
+    {
+      "id": "uri-no-path",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070",
+      "valid": false
+    },
+    {
+      "id": "uri-zero-port",
+      "kind": "uri",
+      "uri": "gofer://example.org:0/",
+      "valid": false
+    },
+    {
+      "id": "uri-large-port",
+      "kind": "uri",
+      "uri": "gofer://example.org:65536/",
+      "valid": false
+    },
+    {
+      "id": "uri-nondecimal-port",
+      "kind": "uri",
+      "uri": "gofer://example.org:abc/",
+      "valid": false
+    },
+    {
+      "id": "uri-userinfo",
+      "kind": "uri",
+      "uri": "gofer://user@example.org:7070/",
+      "valid": false
+    },
+    {
+      "id": "uri-query",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070/?a=b",
+      "valid": false
+    },
+    {
+      "id": "uri-fragment",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070/#part",
+      "valid": false
+    },
+    {
+      "id": "uri-utf8",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070/%FF",
+      "valid": false
+    },
+    {
+      "id": "uri-control",
+      "kind": "uri",
+      "uri": "gofer://example.org:7070/%09",
+      "valid": false
+    }
+  ]
+}
