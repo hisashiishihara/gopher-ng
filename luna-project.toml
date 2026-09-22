@@ -1,0 +1,4 @@
+schema = 1
+repository = "hisashiishihara/gopher-ng"
+implementation_enabled = true
+validation_argv = [["go", "test", "./..."]]
